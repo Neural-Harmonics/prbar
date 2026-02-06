@@ -1,74 +1,296 @@
 # PRBar
 
-PRBar is a macOS 13+ menubar app (Swift + SwiftUI/AppKit) that shows your GitHub pull requests and their GitHub Actions/check status.
+PRBar is a macOS menubar app for tracking your GitHub Pull Requests, checks, and GitHub Actions without keeping a browser tab open.
 
-## Features
+- Platform: macOS 13+
+- UI: Menubar popover + optional floating monitor window
+- Data source: GitHub REST API
+- Auth: GitHub Personal Access Token (stored in macOS Keychain)
 
-- Menubar status item + popover list of your PRs.
-- Split popover workflow: click PR in left list, inspect rich details in right panel.
-- Search + quick scope filters (`All`, `Personal`, `Org:<name>`).
-- Per selected PR details in popover: metadata, labels/assignees/reviewers, merge state (when available), checks, workflow runs, jobs/steps, copy/open actions.
-- Pin selected PR into floating always-on-top monitor window with multi-PR cards.
-- Monitor controls: remove PR, refresh now, pause/resume auto-refresh.
-- Settings window:
-  - GitHub PAT save + validate
-  - refresh interval
-  - open/draft/closed options
-  - fetch limit
-  - scope configuration (personal/org + org multi-select)
-  - tokenized repo allowlist (`owner/repo`) override
-- Background refresh (default 60s) + manual refresh.
-- Shared refresh scheduler coalesces concurrent refresh requests between popover/monitor.
-- Keychain token storage (token is never written to defaults/cache).
-- Local cache (PR data, org list, selected PRs, settings, etags) for fast startup.
-- Pinned monitor PR IDs are persisted in user defaults.
+---
 
-## Build and Run
+## Table of Contents
 
-1. Open `/Users/bisegni/dev/github/bisegni/prbar/PRBar.xcodeproj` in Xcode.
-2. Select the `PRBar` target.
+1. [What PRBar Does](#what-prbar-does)
+2. [Install PRBar](#install-prbar)
+3. [First-Time Setup](#first-time-setup)
+4. [Daily Workflow](#daily-workflow)
+5. [Preferences and Filters](#preferences-and-filters)
+6. [Releases and Update Flow](#releases-and-update-flow)
+7. [Security and Privacy](#security-and-privacy)
+8. [Troubleshooting](#troubleshooting)
+9. [FAQ](#faq)
+10. [For Developers](#for-developers)
+
+---
+
+## What PRBar Does
+
+PRBar helps you quickly inspect PR health from your menubar:
+
+- List your PRs (search + scope filters)
+- Click a PR to see details in the popover:
+  - repo, PR number, title, draft/ready
+  - updated time, branch, commit SHA
+  - review/check summary
+  - latest workflow runs, jobs, and step states
+- Open links directly to PR/run pages in GitHub
+- Copy PR URL and branch name quickly
+- Pin one or more PRs into a floating always-on-top monitor window
+- Auto-refresh data on a fixed interval with basic rate-limit awareness
+
+---
+
+## Install PRBar
+
+### Option A (recommended): DMG
+
+1. Open the latest release.
+2. Download `PRBar-X.Y.Z.dmg`.
+3. Open the DMG and drag `PRBar.app` to `/Applications`.
+4. Launch `PRBar` from Applications.
+
+### Option B: ZIP
+
+1. Download `PRBar.app.zip`.
+2. Unzip it.
+3. Move `PRBar.app` to `/Applications`.
+4. Launch `PRBar`.
+
+### First launch and Gatekeeper
+
+If a build is unsigned/unnnotarized, macOS may block first launch:
+
+- Right-click `PRBar.app` -> `Open` -> confirm.
+- Or System Settings -> Privacy & Security -> allow opening anyway.
+
+Signed/notarized releases should open normally.
+
+---
+
+## First-Time Setup
+
+### 1. Open Settings
+
+- Click PRBar menubar icon.
+- Click `Settings`.
+
+### 2. Add your GitHub token
+
+- Paste a GitHub PAT into `GitHub Token`.
+- Click `Save + Validate`.
+
+PRBar shows token validation status inline.
+
+### 3. Recommended PAT permissions
+
+#### Classic PAT (simple)
+
+- `repo`
+- `read:org`
+- `workflow`
+
+#### Fine-grained PAT
+
+Read access for:
+
+- Pull Requests
+- Actions
+- Checks
+- Repository metadata in repos you want to monitor
+- Organization metadata if using org filters
+
+---
+
+## Daily Workflow
+
+## Menubar Popover
+
+Click PRBar in your menu bar to open the popover.
+
+Left side:
+
+- Scope picker (`All`, `Personal`, `Org:<name>`)
+- Search field
+- PR list
+
+Right side:
+
+- Details for the selected PR
+- Checks and workflow summary
+- Actions for quick operations:
+  - `Open PR`
+  - `Open Run`
+  - `Copy PR URL`
+  - `Copy Branch`
+  - `Pin Floating Monitor`
+
+### Fast PR inspection
+
+1. Open popover.
+2. Type in search (repo or PR title).
+3. Click PR row.
+4. Inspect checks/jobs immediately in the details panel.
+
+### Pin to monitor window
+
+From details panel, click `Pin Floating Monitor`.
+
+The monitor window:
+
+- stays above other windows
+- supports multiple pinned PR cards
+- has controls:
+  - `Refresh now`
+  - `Pause/Resume auto-refresh`
+  - `Remove` per PR
+
+Pinned PR IDs are saved and restored next launch.
+
+---
+
+## Preferences and Filters
+
+Open Settings from popover.
+
+## Refresh
+
+- `Interval` controls refresh cadence (seconds)
+- `Enable auto-refresh` toggles background refresh
+
+## PR fetch behavior
+
+- `PR limit`
+- `Open only`
+- `Include closed`
+- `Include drafts`
+
+## Scope
+
+- Enable/disable Personal and Organizations
+- Select specific orgs
+- Optional repo allowlist tokens (`owner/repo`)
+  - If allowlist is set, it overrides org scoping
+
+## Status visibility
+
+Settings also shows:
+
+- token status
+- API rate limit counters
+- API call metrics by category
+
+---
+
+## Releases and Update Flow
+
+Releases are created from tags in strict semantic format:
+
+- `vMAJOR.MINOR.PATCH` (example: `v0.0.1`)
+
+Each release publishes:
+
+- `PRBar-X.Y.Z.dmg`
+- `PRBar.app.zip`
+
+CI/CD supports two modes:
+
+- Mode A: unsigned packaging (no Apple signing secrets configured)
+- Mode B: signed + notarized + stapled artifacts (best end-user UX)
+
+---
+
+## Security and Privacy
+
+- GitHub token is stored only in macOS Keychain.
+- Token is not written to UserDefaults or local cache files.
+- Cached app data includes PR list/state/settings, but not credentials.
+- Network calls are made to GitHub REST API over HTTPS.
+
+---
+
+## Troubleshooting
+
+## “Missing token” after save
+
+- Re-open Settings and retry `Save + Validate`.
+- Ensure token is non-empty and valid.
+- If error text is shown in red, use that message for diagnosis.
+
+## No PRs appear
+
+- Confirm token scopes/permissions.
+- Check scope filters (Personal/Org/allowlist).
+- Try disabling repo allowlist temporarily.
+- Click manual refresh.
+
+## Rate limits
+
+If close to GitHub rate limit, PRBar slows refresh cadence.
+
+- Check rate display in Settings.
+- Increase interval.
+- Narrow scope or lower PR limit.
+
+## macOS blocked app launch
+
+- Use right-click -> Open for first run if unsigned.
+- Prefer signed/notarized release artifacts when available.
+
+## Monitor window not updating
+
+- Check if monitor auto-refresh is paused.
+- Click `Refresh now`.
+- Verify token validity and API status in Settings.
+
+---
+
+## FAQ
+
+## Does PRBar support multiple GitHub accounts?
+
+Not currently. One token at a time.
+
+## Does PRBar edit or merge PRs?
+
+No. It is read-focused monitoring and navigation.
+
+## Can I use PRBar without org access?
+
+Yes. Personal-only mode works.
+
+## Can I inspect full workflow logs in-app?
+
+PRBar focuses on summaries/job-step states and deep links to GitHub for full logs.
+
+---
+
+## For Developers
+
+### Run locally
+
+1. Open `PRBar.xcodeproj` in Xcode.
+2. Select `PRBar` scheme.
 3. Build and run on macOS.
-4. Click the menubar icon to open the popover.
 
-## GitHub PAT
+### Release workflow
 
-Use either:
+- Workflow file: `.github/workflows/release.yml`
+- Packaging script: `scripts/package.sh`
 
-- Classic PAT: `repo` + `read:org` + `workflow`.
-- Fine-grained PAT: read access to Pull Requests, Actions, Checks, and org metadata for your selected repos/orgs.
+Release trigger tag must be strict semver:
 
-In PRBar Settings, paste token and click `Save + Validate`.
+- `v0.0.1` (valid)
+- `v.0.0.1` (invalid)
 
-## Releases
+### Optional signing/notarization secrets
 
-Tag-based releases are automated with GitHub Actions.
+Set these in GitHub repository Actions secrets for signed Mode B:
 
-- Trigger: push a tag like `v1.2.3`.
-- Workflow builds `PRBar` on `macos-latest` and publishes:
-  - `PRBar-1.2.3.dmg`
-  - `PRBar.app.zip`
-
-Install:
-1. Download `.dmg` (preferred) or `.zip`.
-2. Move `PRBar.app` to `/Applications`.
-3. Launch from Applications.
-
-Signing/notarization modes:
-- Mode A (no Apple secrets): unsigned artifacts are still published; macOS may require right-click -> Open.
-- Mode B (Apple secrets configured): app is signed, notarized, stapled, and DMG is notarized/stapled for cleaner Gatekeeper UX.
-
-Required secrets for Mode B:
-- `MACOS_CERT_P12` (base64-encoded Developer ID Application `.p12`)
+- `MACOS_CERT_P12`
 - `MACOS_CERT_PASSWORD`
 - `MACOS_SIGNING_IDENTITY`
 - `APPLE_TEAM_ID`
 - `APPLE_ID`
 - `APPLE_APP_SPECIFIC_PASSWORD`
 
-## API Notes / TODO
-
-- PR list uses GitHub Search Issues API with scope-aware query strategy.
-- Search requests are paginated (up to configured limit) and merged/deduplicated across scope units.
-- PR details include review-state resolution (`approved`, `changes requested`, `review requested`, `pending`) from PR reviews + requested reviewers.
-- Actions/check list state is loaded during refresh; workflow job/step details are loaded lazily only for selected PRs in the floating window.
-- Full workflow log archive download is not implemented in-app yet; PRBar currently shows best-available check summaries/job-step state and provides `Open in Browser` links.
