@@ -1,0 +1,47 @@
+# macOS
+.DS_Store
+
+# Xcode user data
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+
+# Build artifacts
+build/
+DerivedData/
+*.ipa
+*.dSYM
+*.dSYM.zip
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Fastlane / tooling
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Temporary / logs
+*.log
+*.tmp
+*.swp
+
+# Local env
+.env
+.env.*
+
+# Notarization/signing temp outputs
+*.p12
+*.cer
+*.mobileprovision
+
+# Release artifacts
+*.dmg
+*.zip
+
+# Runner temp
+tmp/

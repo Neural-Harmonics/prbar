@@ -1,0 +1,366 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+	A00000000000000000000001 /* PRBarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000101 /* PRBarApp.swift */; };
+	A00000000000000000000002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000102 /* AppDelegate.swift */; };
+	A00000000000000000000003 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000103 /* StatusBarController.swift */; };
+	A00000000000000000000004 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000104 /* Models.swift */; };
+	A00000000000000000000005 /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000105 /* Errors.swift */; };
+	A00000000000000000000006 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000106 /* KeychainService.swift */; };
+	A00000000000000000000007 /* CacheService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000107 /* CacheService.swift */; };
+	A00000000000000000000008 /* GitHubClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000108 /* GitHubClient.swift */; };
+	A00000000000000000000009 /* PRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000109 /* PRService.swift */; };
+	A0000000000000000000000A /* ActionsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000010A /* ActionsService.swift */; };
+	A0000000000000000000000B /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000010B /* AppContainer.swift */; };
+	A0000000000000000000000C /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000010C /* MainViewModel.swift */; };
+	A0000000000000000000000D /* PRRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000010D /* PRRowView.swift */; };
+	A0000000000000000000000E /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000010E /* PopoverView.swift */; };
+	A0000000000000000000000F /* FloatingPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000010F /* FloatingPanelView.swift */; };
+	A00000000000000000000010 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000110 /* SettingsView.swift */; };
+	A00000000000000000000012 /* RepoAllowlistTokensView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000113 /* RepoAllowlistTokensView.swift */; };
+	A00000000000000000000013 /* MonitorWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000114 /* MonitorWindowController.swift */; };
+	A00000000000000000000014 /* PRSelectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000115 /* PRSelectionState.swift */; };
+	A00000000000000000000015 /* MonitorStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000116 /* MonitorStore.swift */; };
+	A00000000000000000000016 /* RefreshScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000117 /* RefreshScheduler.swift */; };
+	A00000000000000000000017 /* PRDetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000118 /* PRDetailsViewModel.swift */; };
+	A00000000000000000000018 /* PRDetailsPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000119 /* PRDetailsPanelView.swift */; };
+	A00000000000000000000019 /* MonitorWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000011A /* MonitorWindowView.swift */; };
+	A00000000000000000000011 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000111 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+	A00000000000000000000100 /* PRBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PRBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+	A00000000000000000000101 /* PRBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PRBarApp.swift; sourceTree = "<group>"; };
+	A00000000000000000000102 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+	A00000000000000000000103 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+	A00000000000000000000104 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+	A00000000000000000000105 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
+	A00000000000000000000106 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+	A00000000000000000000107 /* CacheService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheService.swift; sourceTree = "<group>"; };
+	A00000000000000000000108 /* GitHubClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubClient.swift; sourceTree = "<group>"; };
+	A00000000000000000000109 /* PRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PRService.swift; sourceTree = "<group>"; };
+	A0000000000000000000010A /* ActionsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionsService.swift; sourceTree = "<group>"; };
+	A0000000000000000000010B /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
+	A0000000000000000000010C /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
+	A0000000000000000000010D /* PRRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PRRowView.swift; sourceTree = "<group>"; };
+	A0000000000000000000010E /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
+	A0000000000000000000010F /* FloatingPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingPanelView.swift; sourceTree = "<group>"; };
+	A00000000000000000000110 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+	A00000000000000000000113 /* RepoAllowlistTokensView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepoAllowlistTokensView.swift; sourceTree = "<group>"; };
+	A00000000000000000000114 /* MonitorWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorWindowController.swift; sourceTree = "<group>"; };
+	A00000000000000000000115 /* PRSelectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PRSelectionState.swift; sourceTree = "<group>"; };
+	A00000000000000000000116 /* MonitorStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorStore.swift; sourceTree = "<group>"; };
+	A00000000000000000000117 /* RefreshScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshScheduler.swift; sourceTree = "<group>"; };
+	A00000000000000000000118 /* PRDetailsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PRDetailsViewModel.swift; sourceTree = "<group>"; };
+	A00000000000000000000119 /* PRDetailsPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PRDetailsPanelView.swift; sourceTree = "<group>"; };
+	A0000000000000000000011A /* MonitorWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorWindowView.swift; sourceTree = "<group>"; };
+	A00000000000000000000111 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+	A00000000000000000000112 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+	A00000000000000000000200 /* Frameworks */ = {
+		isa = PBXFrameworksBuildPhase;
+		buildActionMask = 2147483647;
+		files = (
+		);
+		runOnlyForDeploymentPostprocessing = 0;
+	};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+	A00000000000000000000300 = {
+		isa = PBXGroup;
+		children = (
+			A00000000000000000000301 /* PRBar */,
+			A00000000000000000000302 /* Products */,
+		);
+		sourceTree = "<group>";
+	};
+	A00000000000000000000301 /* PRBar */ = {
+		isa = PBXGroup;
+		children = (
+			A00000000000000000000310 /* App */,
+			A00000000000000000000311 /* Models */,
+			A00000000000000000000312 /* Services */,
+			A00000000000000000000313 /* ViewModels */,
+			A00000000000000000000314 /* Views */,
+			A00000000000000000000315 /* Resources */,
+			A00000000000000000000112 /* Info.plist */,
+		);
+		path = PRBar;
+		sourceTree = "<group>";
+	};
+	A00000000000000000000302 /* Products */ = {
+		isa = PBXGroup;
+		children = (
+			A00000000000000000000100 /* PRBar.app */,
+		);
+		name = Products;
+		sourceTree = "<group>";
+	};
+	A00000000000000000000310 /* App */ = {
+		isa = PBXGroup;
+		children = (
+			A00000000000000000000101 /* PRBarApp.swift */,
+			A00000000000000000000102 /* AppDelegate.swift */,
+			A00000000000000000000103 /* StatusBarController.swift */,
+			A00000000000000000000114 /* MonitorWindowController.swift */,
+		);
+		path = App;
+		sourceTree = "<group>";
+	};
+	A00000000000000000000311 /* Models */ = {
+		isa = PBXGroup;
+		children = (
+			A00000000000000000000104 /* Models.swift */,
+		);
+		path = Models;
+		sourceTree = "<group>";
+	};
+	A00000000000000000000312 /* Services */ = {
+		isa = PBXGroup;
+		children = (
+			A00000000000000000000105 /* Errors.swift */,
+			A00000000000000000000106 /* KeychainService.swift */,
+			A00000000000000000000107 /* CacheService.swift */,
+			A00000000000000000000108 /* GitHubClient.swift */,
+			A00000000000000000000109 /* PRService.swift */,
+			A0000000000000000000010A /* ActionsService.swift */,
+		);
+		path = Services;
+		sourceTree = "<group>";
+	};
+	A00000000000000000000313 /* ViewModels */ = {
+		isa = PBXGroup;
+		children = (
+			A0000000000000000000010B /* AppContainer.swift */,
+			A0000000000000000000010C /* MainViewModel.swift */,
+			A00000000000000000000115 /* PRSelectionState.swift */,
+			A00000000000000000000116 /* MonitorStore.swift */,
+			A00000000000000000000117 /* RefreshScheduler.swift */,
+			A00000000000000000000118 /* PRDetailsViewModel.swift */,
+		);
+		path = ViewModels;
+		sourceTree = "<group>";
+	};
+	A00000000000000000000314 /* Views */ = {
+		isa = PBXGroup;
+		children = (
+			A0000000000000000000010D /* PRRowView.swift */,
+			A0000000000000000000010E /* PopoverView.swift */,
+			A0000000000000000000010F /* FloatingPanelView.swift */,
+			A00000000000000000000110 /* SettingsView.swift */,
+			A00000000000000000000113 /* RepoAllowlistTokensView.swift */,
+			A00000000000000000000119 /* PRDetailsPanelView.swift */,
+			A0000000000000000000011A /* MonitorWindowView.swift */,
+		);
+		path = Views;
+		sourceTree = "<group>";
+	};
+	A00000000000000000000315 /* Resources */ = {
+		isa = PBXGroup;
+		children = (
+			A00000000000000000000111 /* Assets.xcassets */,
+		);
+		path = Resources;
+		sourceTree = "<group>";
+	};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+	A00000000000000000000400 /* PRBar */ = {
+		isa = PBXNativeTarget;
+		buildConfigurationList = A00000000000000000000700 /* Build configuration list for PBXNativeTarget "PRBar" */;
+		buildPhases = (
+			A00000000000000000000500 /* Sources */,
+			A00000000000000000000200 /* Frameworks */,
+			A00000000000000000000501 /* Resources */,
+		);
+		buildRules = (
+		);
+		dependencies = (
+		);
+		name = PRBar;
+		productName = PRBar;
+		productReference = A00000000000000000000100 /* PRBar.app */;
+		productType = "com.apple.product-type.application";
+	};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+	A00000000000000000000600 /* Project object */ = {
+		isa = PBXProject;
+		attributes = {
+			BuildIndependentTargetsInParallel = 1;
+			LastSwiftUpdateCheck = 1550;
+			LastUpgradeCheck = 1550;
+			TargetAttributes = {
+				A00000000000000000000400 = {
+					CreatedOnToolsVersion = 15.5;
+				};
+			};
+		};
+		buildConfigurationList = A00000000000000000000701 /* Build configuration list for PBXProject "PRBar" */;
+		compatibilityVersion = "Xcode 14.0";
+		developmentRegion = en;
+		hasScannedForEncodings = 0;
+		knownRegions = (
+			en,
+			Base,
+		);
+		mainGroup = A00000000000000000000300;
+		productRefGroup = A00000000000000000000302 /* Products */;
+		projectDirPath = "";
+		projectRoot = "";
+		targets = (
+			A00000000000000000000400 /* PRBar */,
+		);
+	};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+	A00000000000000000000501 /* Resources */ = {
+		isa = PBXResourcesBuildPhase;
+		buildActionMask = 2147483647;
+		files = (
+			A00000000000000000000011 /* Assets.xcassets in Resources */,
+		);
+		runOnlyForDeploymentPostprocessing = 0;
+	};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+	A00000000000000000000500 /* Sources */ = {
+		isa = PBXSourcesBuildPhase;
+		buildActionMask = 2147483647;
+		files = (
+			A00000000000000000000001 /* PRBarApp.swift in Sources */,
+			A00000000000000000000002 /* AppDelegate.swift in Sources */,
+			A00000000000000000000003 /* StatusBarController.swift in Sources */,
+			A00000000000000000000004 /* Models.swift in Sources */,
+			A00000000000000000000005 /* Errors.swift in Sources */,
+			A00000000000000000000006 /* KeychainService.swift in Sources */,
+			A00000000000000000000007 /* CacheService.swift in Sources */,
+			A00000000000000000000008 /* GitHubClient.swift in Sources */,
+			A00000000000000000000009 /* PRService.swift in Sources */,
+			A0000000000000000000000A /* ActionsService.swift in Sources */,
+			A0000000000000000000000B /* AppContainer.swift in Sources */,
+			A0000000000000000000000C /* MainViewModel.swift in Sources */,
+			A0000000000000000000000D /* PRRowView.swift in Sources */,
+			A0000000000000000000000E /* PopoverView.swift in Sources */,
+			A0000000000000000000000F /* FloatingPanelView.swift in Sources */,
+			A00000000000000000000010 /* SettingsView.swift in Sources */,
+			A00000000000000000000012 /* RepoAllowlistTokensView.swift in Sources */,
+			A00000000000000000000013 /* MonitorWindowController.swift in Sources */,
+			A00000000000000000000014 /* PRSelectionState.swift in Sources */,
+			A00000000000000000000015 /* MonitorStore.swift in Sources */,
+			A00000000000000000000016 /* RefreshScheduler.swift in Sources */,
+			A00000000000000000000017 /* PRDetailsViewModel.swift in Sources */,
+			A00000000000000000000018 /* PRDetailsPanelView.swift in Sources */,
+			A00000000000000000000019 /* MonitorWindowView.swift in Sources */,
+		);
+		runOnlyForDeploymentPostprocessing = 0;
+	};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+	A00000000000000000000800 /* Debug */ = {
+		isa = XCBuildConfiguration;
+		buildSettings = {
+			ALWAYS_SEARCH_USER_PATHS = NO;
+			CLANG_ENABLE_MODULES = YES;
+			CLANG_ENABLE_OBJC_ARC = YES;
+			CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+			CLANG_WARN_EMPTY_BODY = YES;
+			CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+			COPY_PHASE_STRIP = NO;
+			DEBUG_INFORMATION_FORMAT = dwarf;
+			ENABLE_TESTABILITY = YES;
+			GCC_C_LANGUAGE_STANDARD = gnu17;
+			MACOSX_DEPLOYMENT_TARGET = 13.0;
+			SDKROOT = macosx;
+			SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+			SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+		};
+		name = Debug;
+	};
+	A00000000000000000000801 /* Release */ = {
+		isa = XCBuildConfiguration;
+		buildSettings = {
+			ALWAYS_SEARCH_USER_PATHS = NO;
+			CLANG_ENABLE_MODULES = YES;
+			CLANG_ENABLE_OBJC_ARC = YES;
+			COPY_PHASE_STRIP = NO;
+			DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+			GCC_C_LANGUAGE_STANDARD = gnu17;
+			MACOSX_DEPLOYMENT_TARGET = 13.0;
+			SDKROOT = macosx;
+			SWIFT_COMPILATION_MODE = wholemodule;
+			SWIFT_OPTIMIZATION_LEVEL = "-O";
+		};
+		name = Release;
+	};
+	A00000000000000000000810 /* Debug */ = {
+		isa = XCBuildConfiguration;
+		buildSettings = {
+			ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+			CODE_SIGN_STYLE = Automatic;
+			CURRENT_PROJECT_VERSION = 1;
+			GENERATE_INFOPLIST_FILE = NO;
+			INFOPLIST_FILE = PRBar/Info.plist;
+			LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+			MARKETING_VERSION = 1.0;
+			PRODUCT_BUNDLE_IDENTIFIER = com.bisegni.PRBar;
+			PRODUCT_NAME = "$(TARGET_NAME)";
+			SWIFT_VERSION = 5.0;
+		};
+		name = Debug;
+	};
+	A00000000000000000000811 /* Release */ = {
+		isa = XCBuildConfiguration;
+		buildSettings = {
+			ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+			CODE_SIGN_STYLE = Automatic;
+			CURRENT_PROJECT_VERSION = 1;
+			GENERATE_INFOPLIST_FILE = NO;
+			INFOPLIST_FILE = PRBar/Info.plist;
+			LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+			MARKETING_VERSION = 1.0;
+			PRODUCT_BUNDLE_IDENTIFIER = com.bisegni.PRBar;
+			PRODUCT_NAME = "$(TARGET_NAME)";
+			SWIFT_VERSION = 5.0;
+		};
+		name = Release;
+	};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+	A00000000000000000000700 /* Build configuration list for PBXNativeTarget "PRBar" */ = {
+		isa = XCConfigurationList;
+		buildConfigurations = (
+			A00000000000000000000810 /* Debug */,
+			A00000000000000000000811 /* Release */,
+		);
+		defaultConfigurationIsVisible = 0;
+		defaultConfigurationName = Release;
+	};
+	A00000000000000000000701 /* Build configuration list for PBXProject "PRBar" */ = {
+		isa = XCConfigurationList;
+		buildConfigurations = (
+			A00000000000000000000800 /* Debug */,
+			A00000000000000000000801 /* Release */,
+		);
+		defaultConfigurationIsVisible = 0;
+		defaultConfigurationName = Release;
+	};
+/* End XCConfigurationList section */
+	};
+	rootObject = A00000000000000000000600 /* Project object */;
+}

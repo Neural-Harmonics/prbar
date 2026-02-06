@@ -1,0 +1,179 @@
+name: Release macOS
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: macos-latest
+
+    env:
+      SCHEME: PRBar
+      PROJECT: PRBar.xcodeproj
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve version and mode
+        shell: bash
+        env:
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+          if [[ -n "${MACOS_CERT_P12}" && -n "${MACOS_CERT_PASSWORD}" && -n "${MACOS_SIGNING_IDENTITY}" && -n "${APPLE_TEAM_ID}" && -n "${APPLE_ID}" && -n "${APPLE_APP_SPECIFIC_PASSWORD}" ]]; then
+            echo "MODE=SIGNED_NOTARIZED" >> "$GITHUB_ENV"
+            echo "SIGNING_ENABLED=true" >> "$GITHUB_ENV"
+            echo "::notice::Mode B enabled: signing + notarization"
+          else
+            echo "MODE=UNSIGNED" >> "$GITHUB_ENV"
+            echo "SIGNING_ENABLED=false" >> "$GITHUB_ENV"
+            echo "::warning::Mode A enabled: signing secrets missing, producing unsigned artifacts"
+          fi
+
+      - name: Build archive (universal)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE_PATH="$RUNNER_TEMP/PRBar.xcarchive"
+          xcodebuild \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -destination 'generic/platform=macOS' \
+            -archivePath "$ARCHIVE_PATH" \
+            SKIP_INSTALL=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            ONLY_ACTIVE_ARCH=NO \
+            ARCHS='arm64 x86_64' \
+            MARKETING_VERSION="$VERSION" \
+            CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
+            archive
+
+          APP_PATH="$ARCHIVE_PATH/Products/Applications/PRBar.app"
+          if [[ ! -d "$APP_PATH" ]]; then
+            echo "Archive missing app bundle"
+            exit 1
+          fi
+
+          echo "ARCHIVE_PATH=$ARCHIVE_PATH" >> "$GITHUB_ENV"
+          echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
+
+      - name: Import signing certificate (Mode B)
+        if: env.SIGNING_ENABLED == 'true'
+        shell: bash
+        env:
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          set -euo pipefail
+          KEYCHAIN_PATH="$RUNNER_TEMP/prbar-signing.keychain-db"
+          KEYCHAIN_PASSWORD="temp-keychain-password"
+          CERT_PATH="$RUNNER_TEMP/signing-cert.p12"
+
+          echo "$MACOS_CERT_P12" | base64 --decode > "$CERT_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain-db
+          security import "$CERT_PATH" -k "$KEYCHAIN_PATH" -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+
+      - name: Codesign app (Mode B)
+        if: env.SIGNING_ENABLED == 'true'
+        shell: bash
+        env:
+          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+        run: |
+          set -euo pipefail
+          /usr/bin/codesign --force --deep --options runtime --timestamp --sign "$MACOS_SIGNING_IDENTITY" "$APP_PATH"
+          /usr/bin/codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+
+      - name: Notarize app bundle (Mode B)
+        if: env.SIGNING_ENABLED == 'true'
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: |
+          set -euo pipefail
+          NOTARY_ZIP="$RUNNER_TEMP/PRBar-notary.zip"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$NOTARY_ZIP"
+
+          xcrun notarytool submit "$NOTARY_ZIP" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait
+
+          xcrun stapler staple "$APP_PATH"
+
+      - name: Package app (.zip + .dmg)
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT_DIR="$RUNNER_TEMP/release-artifacts"
+          ./scripts/package.sh "$APP_PATH" "$VERSION" "$OUT_DIR"
+          ls -lah "$OUT_DIR"
+
+      - name: Notarize DMG + verify (Mode B)
+        if: env.SIGNING_ENABLED == 'true'
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: |
+          set -euo pipefail
+          xcrun notarytool submit "$DMG_PATH" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait
+
+          xcrun stapler staple "$DMG_PATH"
+          spctl --assess --type execute --verbose "$APP_PATH"
+          spctl --assess --type open --verbose "$DMG_PATH"
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: PRBar-${{ env.VERSION }}-${{ env.MODE }}
+          path: |
+            ${{ env.DMG_PATH }}
+            ${{ env.ZIP_PATH }}
+
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: PRBar ${{ env.VERSION }}
+          generate_release_notes: true
+          files: |
+            ${{ env.DMG_PATH }}
+            ${{ env.ZIP_PATH }}
+          fail_on_unmatched_files: true
+          append_body: true
+          body: |
+            Build mode: `${{ env.MODE }}`
+            - `PRBar-${{ env.VERSION }}.dmg`
+            - `PRBar.app.zip`
