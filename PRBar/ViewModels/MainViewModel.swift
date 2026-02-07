@@ -6,9 +6,19 @@ final class MainViewModel: ObservableObject {
     @Published var query = ""
 
     private let container: AppContainer
+    private var containerSink: AnyCancellable?
+    private var monitorStoreSink: AnyCancellable?
 
     init(container: AppContainer) {
         self.container = container
+        containerSink = container.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+        monitorStoreSink = container.monitorStore.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
         container.refreshScheduler.register(key: "pr-list-refresh") { [weak self] in
             await self?.refreshAll(manual: false)
         }
@@ -17,14 +27,47 @@ final class MainViewModel: ObservableObject {
 
     var filteredPRs: [PullRequest] {
         container.pullRequests.filter { pr in
+            guard matchesQuickScope(pr) else { return false }
             let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
             if q.isEmpty { return true }
             return pr.title.localizedCaseInsensitiveContains(q) || pr.repo.fullName.localizedCaseInsensitiveContains(q)
         }
     }
 
+    private func matchesQuickScope(_ pr: PullRequest) -> Bool {
+        switch container.settings.quickScope {
+        case .all:
+            return matchesAllScope(pr)
+        case .personal:
+            guard let login = container.user?.login.lowercased() else { return true }
+            return pr.repo.owner.lowercased() == login
+        case let .organization(org):
+            return pr.repo.owner.caseInsensitiveCompare(org) == .orderedSame
+        }
+    }
+
+    private func matchesAllScope(_ pr: PullRequest) -> Bool {
+        let scope = container.settings.scope
+        let owner = pr.repo.owner.lowercased()
+        let selectedOrgs = Set(scope.selectedOrgs.map { $0.lowercased() })
+        let login = container.user?.login.lowercased()
+
+        if scope.personalEnabled, let login, owner == login {
+            return true
+        }
+        if scope.organizationsEnabled, selectedOrgs.contains(owner) {
+            return true
+        }
+        if !scope.personalEnabled && !scope.organizationsEnabled {
+            return true
+        }
+        return false
+    }
+
     func setQuickScope(_ scope: PopoverScopeSelection) {
-        container.settings.quickScope = scope
+        var next = container.settings
+        next.quickScope = normalizedQuickScope(scope, availableOrgs: container.orgs)
+        container.settings = next
         container.saveCache()
         Task { await requestRefresh() }
     }
@@ -99,9 +142,12 @@ final class MainViewModel: ObservableObject {
             let (orgs, orgETag) = try await container.prService.fetchOrganizations(token: token, etag: container.etags["orgs"])
             if let orgs {
                 container.orgs = orgs
-                if container.settings.scope.selectedOrgs.isEmpty {
-                    container.settings.scope.selectedOrgs = Set(orgs.prefix(3).map { $0.login })
+                var next = container.settings
+                if next.scope.selectedOrgs.isEmpty {
+                    next.scope.selectedOrgs = Set(orgs.prefix(3).map { $0.login })
                 }
+                next.quickScope = normalizedQuickScope(next.quickScope, availableOrgs: orgs)
+                container.settings = next
             }
             if let orgETag { container.setETag(orgETag, for: "orgs") }
 
@@ -180,7 +226,9 @@ final class MainViewModel: ObservableObject {
     }
 
     func updateSettings(_ settings: AppSettings) {
-        container.settings = settings
+        var next = settings
+        next.quickScope = normalizedQuickScope(next.quickScope, availableOrgs: container.orgs)
+        container.settings = next
         container.saveCache()
         container.configureScheduler()
     }
@@ -191,7 +239,7 @@ final class MainViewModel: ObservableObject {
 
     func currentSettings() -> AppSettings { container.settings }
     func currentUser() -> Identity? { container.user }
-    func currentOrgs() -> [Identity] { container.orgs }
+    func currentOrgs() -> [Identity] { container.orgs.sorted { $0.login.localizedCaseInsensitiveCompare($1.login) == .orderedAscending } }
     func rateLimit() -> RateLimitInfo { container.rateLimitInfo }
     func apiMetrics() -> APIMetrics { container.apiMetrics }
     func actions(for prID: String) -> ActionsDetail? { container.actionsByPRID[prID] }
@@ -216,4 +264,23 @@ final class MainViewModel: ObservableObject {
     }
     func error() -> String? { container.errorMessage }
     func tokenStatus() -> String { container.tokenStatus }
+    var isLoading: Bool { container.isLoading }
+    var isAutoRefreshPaused: Bool { container.monitorStore.autoRefreshPaused }
+
+    func toggleAutoRefresh() {
+        container.monitorStore.setPaused(!container.monitorStore.autoRefreshPaused)
+        container.configureScheduler()
+    }
+
+    private func normalizedQuickScope(_ scope: PopoverScopeSelection, availableOrgs: [Identity]) -> PopoverScopeSelection {
+        switch scope {
+        case let .organization(org):
+            if availableOrgs.contains(where: { $0.login.caseInsensitiveCompare(org) == .orderedSame }) {
+                return .organization(org)
+            }
+            return .all
+        case .all, .personal:
+            return scope
+        }
+    }
 }

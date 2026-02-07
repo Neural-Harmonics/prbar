@@ -238,7 +238,7 @@ final class PRService {
             if settings.scope.organizationsEnabled {
                 units.append(contentsOf: settings.scope.selectedOrgs.map { "org:\($0)" })
             }
-            return units.filter { !$0.isEmpty }
+            return units
         case .personal:
             return []
         case let .organization(org):

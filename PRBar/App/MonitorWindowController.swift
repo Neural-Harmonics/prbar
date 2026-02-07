@@ -8,20 +8,24 @@ final class MonitorWindowController {
     func show(viewModel: MainViewModel, monitorStore: MonitorStore) {
         let hosting = NSHostingController(rootView: MonitorWindowView(viewModel: viewModel, monitorStore: monitorStore))
         if controller == nil {
-            let panel = NSPanel(contentRect: NSRect(x: 260, y: 240, width: 860, height: 620),
-                                styleMask: [.titled, .closable, .resizable, .utilityWindow],
-                                backing: .buffered,
-                                defer: false)
-            panel.isFloatingPanel = true
-            panel.level = .floating
-            panel.title = "PRBar Monitor"
-            panel.contentViewController = hosting
-            controller = NSWindowController(window: panel)
+            let window = NSWindow(contentRect: NSRect(x: 260, y: 240, width: 860, height: 260),
+                                  styleMask: [.titled, .closable, .miniaturizable, .resizable],
+                                  backing: .buffered,
+                                  defer: false)
+            window.level = .floating
+            window.title = "PRBar Monitor"
+            window.contentViewController = hosting
+            window.isReleasedWhenClosed = false
+            window.collectionBehavior = [.moveToActiveSpace]
+            window.minSize = NSSize(width: 700, height: 120)
+            window.center()
+            controller = NSWindowController(window: window)
         } else {
             controller?.contentViewController = hosting
         }
 
         controller?.showWindow(nil)
+        controller?.window?.orderFrontRegardless()
         controller?.window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }

@@ -30,6 +30,7 @@ final class StatusBarController {
             viewModel: viewModel,
             detailsViewModel: detailsViewModel,
             pinToMonitor: { [weak self] in self?.pinToMonitor() },
+            openMonitor: { [weak self] in self?.openMonitor() },
             openSettings: { [weak self] in self?.showSettingsWindow() },
             quitApp: { [weak self] in self?.quitApp() }
         ))
@@ -46,6 +47,10 @@ final class StatusBarController {
 
     private func pinToMonitor() {
         viewModel.pinSelectedPRToMonitor()
+        openMonitor()
+    }
+
+    private func openMonitor() {
         monitorWindowController.show(viewModel: viewModel, monitorStore: container.monitorStore)
     }
 
