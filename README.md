@@ -2,6 +2,16 @@
 
 PRBar is a macOS menubar app for tracking your GitHub Pull Requests, checks, and GitHub Actions without keeping a browser tab open.
 
+## Preview
+
+### Main View
+
+![PRBar Main View](docs/main-view.png)
+
+### Monitor View
+
+![PRBar Monitor View](docs/monitor.png)
+
 - Platform: macOS 13+
 - UI: Menubar popover + optional floating monitor window
 - Data source: GitHub REST API
@@ -14,7 +24,7 @@ PRBar is a macOS menubar app for tracking your GitHub Pull Requests, checks, and
 1. [What PRBar Does](#what-prbar-does)
 2. [Install PRBar](#install-prbar)
 3. [First-Time Setup](#first-time-setup)
-4. [Daily Workflow](#daily-workflow)
+4. [UI Guides](#ui-guides)
 5. [Preferences and Filters](#preferences-and-filters)
 6. [Releases and Update Flow](#releases-and-update-flow)
 7. [Security and Privacy](#security-and-privacy)
@@ -102,50 +112,20 @@ Read access for:
 
 ---
 
-## Daily Workflow
+## UI Guides
+
+PRBar includes two user-facing views. Start with these guides:
+
+- [Main View Guide](docs/main-view.md)
+- [Monitor View Guide](docs/monitor.md)
 
 ## Menubar Popover
 
-Click PRBar in your menu bar to open the popover.
+Click PRBar in your menu bar to open the popover (main view). For a full walkthrough with screenshot, see [Main View Guide](docs/main-view.md).
 
-Left side:
+## Floating Monitor
 
-- Scope picker (`All`, `Personal`, `Org:<name>`)
-- Search field
-- PR list
-
-Right side:
-
-- Details for the selected PR
-- Checks and workflow summary
-- Actions for quick operations:
-  - `Open PR`
-  - `Open Run`
-  - `Copy PR URL`
-  - `Copy Branch`
-  - `Pin Floating Monitor`
-
-### Fast PR inspection
-
-1. Open popover.
-2. Type in search (repo or PR title).
-3. Click PR row.
-4. Inspect checks/jobs immediately in the details panel.
-
-### Pin to monitor window
-
-From details panel, click `Pin Floating Monitor`.
-
-The monitor window:
-
-- stays above other windows
-- supports multiple pinned PR cards
-- has controls:
-  - `Refresh now`
-  - `Pause/Resume auto-refresh`
-  - `Remove` per PR
-
-Pinned PR IDs are saved and restored next launch.
+Use `Pin Floating Monitor` in the main view to open and populate the monitor window. For setup and usage details with screenshot, see [Monitor View Guide](docs/monitor.md).
 
 ---
 
@@ -293,4 +273,3 @@ Set these in GitHub repository Actions secrets for signed Mode B:
 - `APPLE_TEAM_ID`
 - `APPLE_ID`
 - `APPLE_APP_SPECIFIC_PASSWORD`
-
