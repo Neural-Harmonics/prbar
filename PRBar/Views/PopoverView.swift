@@ -4,6 +4,7 @@ struct PopoverView: View {
     @ObservedObject var viewModel: MainViewModel
     @ObservedObject var detailsViewModel: PRDetailsViewModel
     let pinToMonitor: () -> Void
+    let openMonitor: () -> Void
     let openSettings: () -> Void
     let quitApp: () -> Void
     private let detailsPanelWidth: CGFloat = 430
@@ -17,18 +18,25 @@ struct PopoverView: View {
                 VStack(spacing: 8) {
                     HStack {
                         Picker("Scope", selection: Binding(
-                            get: { viewModel.currentSettings().quickScope },
-                            set: { viewModel.setQuickScope($0) }
+                            get: { scopeSelectionKey(for: viewModel.currentSettings().quickScope) },
+                            set: { viewModel.setQuickScope(quickScope(from: $0)) }
                         )) {
-                            Text("All").tag(PopoverScopeSelection.all)
-                            Text("Personal").tag(PopoverScopeSelection.personal)
+                            Text("All").tag("all")
+                            Text("Personal").tag("personal")
                             ForEach(viewModel.currentOrgs(), id: \.login) { org in
-                                Text("Org: \(org.login)").tag(PopoverScopeSelection.organization(org.login))
+                                Text("Org: \(org.login)").tag("org:\(org.login)")
                             }
                         }
                         .pickerStyle(.menu)
 
                         Spacer()
+                        Button {
+                            viewModel.toggleAutoRefresh()
+                        } label: {
+                            Image(systemName: viewModel.isAutoRefreshPaused ? "play.circle" : "pause.circle")
+                        }
+                        .buttonStyle(.borderless)
+                        .help(viewModel.isAutoRefreshPaused ? "Resume auto-refresh" : "Pause auto-refresh")
                         Button {
                             Task { await viewModel.requestRefresh() }
                         } label: {
@@ -92,9 +100,13 @@ struct PopoverView: View {
 
             HStack {
                 Text(viewModel.tokenStatus()).font(.caption).foregroundStyle(.secondary)
+                if viewModel.isLoading {
+                    ProgressView()
+                        .controlSize(.small)
+                }
                 Spacer()
                 Button("Settings", action: openSettings)
-                Button("Open Monitor") { pinToMonitor() }
+                Button("Open Monitor", action: openMonitor)
                 Button("Quit", action: quitApp)
             }
 
@@ -108,5 +120,25 @@ struct PopoverView: View {
             await viewModel.validateTokenAndLoadIdentity()
             await viewModel.requestRefresh()
         }
+    }
+
+    private func scopeSelectionKey(for scope: PopoverScopeSelection) -> String {
+        switch scope {
+        case .all:
+            return "all"
+        case .personal:
+            return "personal"
+        case let .organization(org):
+            return "org:\(org)"
+        }
+    }
+
+    private func quickScope(from key: String) -> PopoverScopeSelection {
+        if key == "all" { return .all }
+        if key == "personal" { return .personal }
+        if key.hasPrefix("org:") {
+            return .organization(String(key.dropFirst(4)))
+        }
+        return .all
     }
 }

@@ -6,23 +6,27 @@ struct PRDetailsPanelView: View {
     let pinMonitor: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            if detailsViewModel.isLoading {
-                ProgressView("Loading details...")
-            } else if let details = detailsViewModel.details {
-                header(details)
-                meta(details)
-                checks(details)
-                actions(details)
-                buttons(details)
-            } else {
-                Text("Select a PR to view details").foregroundStyle(.secondary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                if detailsViewModel.isLoading {
+                    ProgressView("Loading details...")
+                } else if let details = detailsViewModel.details {
+                    header(details)
+                    meta(details)
+                    checks(details)
+                    actions(details)
+                    buttons(details)
+                } else {
+                    Text("Select a PR to view details").foregroundStyle(.secondary)
+                }
+                if let err = detailsViewModel.error {
+                    Text(err).font(.caption).foregroundStyle(.red)
+                }
             }
-            if let err = detailsViewModel.error {
-                Text(err).font(.caption).foregroundStyle(.red)
-            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(10)
+        .frame(maxHeight: .infinity, alignment: .topLeading)
     }
 
     @ViewBuilder private func header(_ d: PRExpandedDetails) -> some View {
