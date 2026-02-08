@@ -19,7 +19,7 @@ final class StatusBarController {
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "point.3.connected.trianglepath.dotted", accessibilityDescription: "PRBar")
+            button.image = menuBarIconImage()
             button.action = #selector(togglePopover(_:))
             button.target = self
         }
@@ -77,5 +77,23 @@ final class StatusBarController {
 
     private func quitApp() {
         NSApp.terminate(nil)
+    }
+
+    private func menuBarIconImage() -> NSImage? {
+        let symbolNames = [
+            "arrow.triangle.branch",
+            "arrow.triangle.merge",
+            "point.3.connected.trianglepath.dotted"
+        ]
+
+        let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+        for name in symbolNames {
+            if let image = NSImage(systemSymbolName: name, accessibilityDescription: "PRBar") {
+                let configured = image.withSymbolConfiguration(config) ?? image
+                configured.isTemplate = true
+                return configured
+            }
+        }
+        return nil
     }
 }
