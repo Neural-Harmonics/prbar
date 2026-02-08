@@ -8,7 +8,7 @@ xcuserdata/
 *.xcscmblueprint
 
 # Build artifacts
-build/
+[Bb]uild/
 DerivedData/
 *.ipa
 *.dSYM
