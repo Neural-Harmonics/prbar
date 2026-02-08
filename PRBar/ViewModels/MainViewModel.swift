@@ -26,7 +26,9 @@ final class MainViewModel: ObservableObject {
     }
 
     var filteredPRs: [PullRequest] {
-        container.pullRequests.filter { pr in
+        container.pullRequests
+            .sorted(by: { lastActivityDate(for: $0) > lastActivityDate(for: $1) })
+            .filter { pr in
             guard matchesQuickScope(pr) else { return false }
             let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
             if q.isEmpty { return true }
@@ -209,7 +211,7 @@ final class MainViewModel: ObservableObject {
                 }
             }
 
-            container.pullRequests = result
+            container.pullRequests = result.sorted(by: { lastActivityDate(for: $0, actionsMap: actionsMap) > lastActivityDate(for: $1, actionsMap: actionsMap) })
             container.actionsByPRID = actionsMap
             container.replaceETags(etagMap)
             container.rateLimitInfo = container.github.rateLimit
@@ -282,5 +284,13 @@ final class MainViewModel: ObservableObject {
         case .all, .personal:
             return scope
         }
+    }
+
+    private func lastActivityDate(for pr: PullRequest, actionsMap: [String: ActionsDetail]? = nil) -> Date {
+        let source = actionsMap ?? container.actionsByPRID
+        let workflowDate = source[pr.stableID]?.runs
+            .map(\.updatedAt)
+            .max() ?? .distantPast
+        return max(pr.updatedAt, workflowDate)
     }
 }
