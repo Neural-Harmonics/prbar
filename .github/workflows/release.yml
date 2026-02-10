@@ -15,6 +15,8 @@ jobs:
     env:
       SCHEME: PRBar
       PROJECT: PRBar.xcodeproj
+      HOMEBREW_TAP_REPO: neural-harmonics/homebrew-prbar
+      HOMEBREW_CASK_NAME: prbar
 
     steps:
       - name: Checkout
@@ -141,6 +143,21 @@ jobs:
           ./scripts/package.sh "$APP_PATH" "$VERSION" "$OUT_DIR"
           ls -lah "$OUT_DIR"
 
+      - name: Compute Homebrew zip checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${ZIP_PATH:-}" || ! -f "$ZIP_PATH" ]]; then
+            echo "::error::Release ZIP not found at '$ZIP_PATH'"
+            exit 1
+          fi
+          ZIP_SHA256="$(shasum -a 256 "$ZIP_PATH" | awk '{print $1}')"
+          if [[ -z "$ZIP_SHA256" ]]; then
+            echo "::error::Failed to compute ZIP sha256"
+            exit 1
+          fi
+          echo "ZIP_SHA256=$ZIP_SHA256" >> "$GITHUB_ENV"
+
       - name: Notarize DMG + verify (Mode B)
         if: env.SIGNING_ENABLED == 'true'
         shell: bash
@@ -183,3 +200,79 @@ jobs:
             Build mode: `${{ env.MODE }}`
             - `PRBar-${{ env.VERSION }}.dmg`
             - `PRBar.app.zip`
+
+      - name: Validate Homebrew cask (style + audit + smoke install)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${ZIP_SHA256:-}" ]]; then
+            echo "::error::ZIP_SHA256 is missing"
+            exit 1
+          fi
+
+          TEMPLATE_PATH=".github/homebrew/Casks/prbar.rb.tmpl"
+          if [[ ! -f "$TEMPLATE_PATH" ]]; then
+            echo "::error::Missing cask template: $TEMPLATE_PATH"
+            exit 1
+          fi
+
+          TMP_DIR="$(mktemp -d)"
+          TMP_TAP_DIR="$TMP_DIR/homebrew-prbar"
+          mkdir -p "$TMP_TAP_DIR/Casks"
+          TMP_CASK="$TMP_TAP_DIR/Casks/prbar.rb"
+          cp "$TEMPLATE_PATH" "$TMP_CASK"
+          sed -i '' "s/__VERSION__/${VERSION}/g" "$TMP_CASK"
+          sed -i '' "s/__SHA256__/${ZIP_SHA256}/g" "$TMP_CASK"
+
+          brew untap neural-harmonics/prbar >/dev/null 2>&1 || true
+          brew tap neural-harmonics/prbar "file://$TMP_TAP_DIR"
+          brew style --cask prbar
+          brew audit --cask --online --tap neural-harmonics/prbar prbar
+
+          brew uninstall --cask prbar >/dev/null 2>&1 || true
+          brew install --cask neural-harmonics/prbar/prbar
+          test -d "/Applications/PRBar.app"
+          brew uninstall --cask prbar >/dev/null 2>&1 || true
+
+      - name: Update Homebrew tap cask
+        shell: bash
+        env:
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${HOMEBREW_TAP_GITHUB_TOKEN:-}" ]]; then
+            echo "::warning::HOMEBREW_TAP_GITHUB_TOKEN is not configured. Skipping tap update."
+            exit 0
+          fi
+
+          if [[ -z "${ZIP_SHA256:-}" ]]; then
+            echo "::error::ZIP_SHA256 is missing"
+            exit 1
+          fi
+
+          TAP_DIR="$RUNNER_TEMP/homebrew-tap"
+          TEMPLATE_PATH=".github/homebrew/Casks/prbar.rb.tmpl"
+          if [[ ! -f "$TEMPLATE_PATH" ]]; then
+            echo "::error::Missing cask template: $TEMPLATE_PATH"
+            exit 1
+          fi
+
+          git clone "https://x-access-token:${HOMEBREW_TAP_GITHUB_TOKEN}@github.com/${HOMEBREW_TAP_REPO}.git" "$TAP_DIR"
+          mkdir -p "$TAP_DIR/Casks"
+
+          cp "$TEMPLATE_PATH" "$TAP_DIR/Casks/${HOMEBREW_CASK_NAME}.rb"
+          sed -i '' "s/__VERSION__/${VERSION}/g" "$TAP_DIR/Casks/${HOMEBREW_CASK_NAME}.rb"
+          sed -i '' "s/__SHA256__/${ZIP_SHA256}/g" "$TAP_DIR/Casks/${HOMEBREW_CASK_NAME}.rb"
+
+          cd "$TAP_DIR"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- "Casks/${HOMEBREW_CASK_NAME}.rb"; then
+            echo "::notice::No cask changes detected for ${HOMEBREW_CASK_NAME}"
+            exit 0
+          fi
+
+          git add "Casks/${HOMEBREW_CASK_NAME}.rb"
+          git commit -m "chore(cask): bump ${HOMEBREW_CASK_NAME} to ${VERSION}"
+          git push origin HEAD

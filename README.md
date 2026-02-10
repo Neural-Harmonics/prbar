@@ -53,14 +53,38 @@ PRBar helps you quickly inspect PR health from your menubar:
 
 ## Install PRBar
 
-### Option A (recommended): DMG
+### Option A (recommended): Homebrew
+
+1. Tap the PRBar cask repo:
+   ```bash
+   brew tap neural-harmonics/prbar
+   ```
+2. Install:
+   ```bash
+   brew install --cask prbar
+   ```
+
+Or in one command:
+
+```bash
+brew install --cask neural-harmonics/prbar/prbar
+```
+
+To uninstall:
+
+```bash
+brew uninstall --cask prbar
+brew untap neural-harmonics/prbar
+```
+
+### Option B: DMG
 
 1. Open the latest release.
 2. Download `PRBar-X.Y.Z.dmg`.
 3. Open the DMG and drag `PRBar.app` to `/Applications`.
 4. Launch `PRBar` from Applications.
 
-### Option B: ZIP
+### Option C: ZIP
 
 1. Download `PRBar.app.zip`.
 2. Unzip it.
@@ -177,6 +201,18 @@ CI/CD supports two modes:
 
 - Mode A: unsigned packaging (no Apple signing secrets configured)
 - Mode B: signed + notarized + stapled artifacts (best end-user UX)
+
+Homebrew cask update automation:
+
+- Release workflow computes `sha256` from `PRBar.app.zip`.
+- Workflow validates generated cask (`brew style`, `brew audit`, smoke install).
+- Workflow updates `neural-harmonics/homebrew-prbar` with `Casks/prbar.rb`.
+
+Maintainer requirements:
+
+- Keep tag format strict: `vMAJOR.MINOR.PATCH`.
+- Keep release zip asset name exactly `PRBar.app.zip`.
+- Configure `HOMEBREW_TAP_GITHUB_TOKEN` secret with push access to `neural-harmonics/homebrew-prbar`.
 
 ---
 
