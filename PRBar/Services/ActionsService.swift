@@ -15,8 +15,7 @@ final class ActionsService {
             "repos/\(pr.repo.owner)/\(pr.repo.name)/actions/runs",
             token: token,
             query: [
-                URLQueryItem(name: "per_page", value: "5"),
-                URLQueryItem(name: "event", value: "pull_request")
+                URLQueryItem(name: "per_page", value: "30")
             ],
             etag: etags[runsKey(for: pr)],
             decoder: .github
