@@ -16,8 +16,8 @@ struct PRRowView: View {
                 Text(pr.title).font(.subheadline).lineLimit(2)
                 HStack(spacing: 8) {
                     label(icon: "message", text: pr.reviewState ?? "review: n/a")
-                    label(icon: stateIcon(pr.checkSummary?.state), text: "checks")
-                    label(icon: stateIcon(pr.actionsSummary?.state), text: "actions")
+                    stateLabel(state: pr.checkSummary?.state, text: "checks")
+                    stateLabel(state: pr.actionsSummary?.state, text: "actions")
                 }.font(.caption2).foregroundStyle(.secondary)
             }
             Spacer()
@@ -33,12 +33,44 @@ struct PRRowView: View {
         }
     }
 
-    private func stateIcon(_ raw: String?) -> String {
-        switch raw {
-        case "success": return ActionState.success.sfSymbol
-        case "failure", "cancelled", "timed_out": return ActionState.failure.sfSymbol
-        case "in_progress", "queued", "waiting", "requested": return ActionState.inProgress.sfSymbol
-        default: return ActionState.neutral.sfSymbol
+    private func stateLabel(state: String?, text: String) -> some View {
+        let mapped = mappedState(state)
+        return HStack(spacing: 4) {
+            Circle()
+                .fill(stateColor(mapped))
+                .frame(width: 7, height: 7)
+            Image(systemName: stateIcon(mapped))
+            Text(text)
         }
+    }
+
+    private func mappedState(_ raw: String?) -> ActionState {
+        switch raw {
+        case "success":
+            return .success
+        case "failure", "cancelled", "timed_out":
+            return .failure
+        case "in_progress", "queued", "waiting", "requested":
+            return .inProgress
+        default:
+            return .neutral
+        }
+    }
+
+    private func stateColor(_ state: ActionState) -> Color {
+        switch state {
+        case .success:
+            return .green
+        case .failure:
+            return .red
+        case .inProgress:
+            return .yellow
+        case .neutral:
+            return .gray
+        }
+    }
+
+    private func stateIcon(_ state: ActionState) -> String {
+        state.sfSymbol
     }
 }

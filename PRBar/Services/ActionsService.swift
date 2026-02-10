@@ -36,18 +36,24 @@ final class ActionsService {
         let mappedRuns = runs.value?.workflow_runs.map {
             WorkflowRun(id: $0.id, name: $0.name, status: $0.status, conclusion: $0.conclusion, htmlURL: $0.html_url, createdAt: $0.created_at, updatedAt: $0.updated_at, headSHA: $0.head_sha)
         } ?? []
+        let runsForPR: [WorkflowRun]
+        if pr.headSHA.isEmpty {
+            runsForPR = mappedRuns
+        } else {
+            runsForPR = mappedRuns.filter { $0.headSHA == pr.headSHA }
+        }
 
         if let etag = runs.etag { nextEtags[runsKey(for: pr)] = etag }
         if let etag = checks.etag { nextEtags[checksKey(for: pr)] = etag }
 
-        nextPR.actionsSummary = WorkflowSummary(state: workflowState(from: mappedRuns.first), latestRun: mappedRuns.first)
+        nextPR.actionsSummary = WorkflowSummary(state: workflowState(from: runsForPR.first), latestRun: runsForPR.first)
 
         let mappedChecks = checks.value?.check_runs.map {
             CheckRun(id: $0.id, name: $0.name, status: $0.status, conclusion: $0.conclusion, detailsURL: $0.details_url, summary: $0.output?.summary)
         } ?? []
         nextPR.checkSummary = CheckSummary(state: overallCheckState(checks: mappedChecks), runs: mappedChecks)
 
-        return (nextPR, ActionsDetail(runs: mappedRuns, jobsByRunID: [:]), nextEtags)
+        return (nextPR, ActionsDetail(runs: runsForPR, jobsByRunID: [:]), nextEtags)
     }
 
     func loadJobs(for pr: PullRequest, runs: [WorkflowRun], token: String) async throws -> [Int: [Job]] {

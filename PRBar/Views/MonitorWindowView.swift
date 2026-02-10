@@ -35,17 +35,21 @@ struct MonitorWindowView: View {
                                 Button("Remove") { viewModel.unpinFromMonitor(prID: pr.stableID) }
                             }
                             Text(pr.title).font(.subheadline)
-                            Text("Checks: \(pr.checkSummary?.state ?? "n/a") · Actions: \(pr.actionsSummary?.state ?? "n/a")")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            HStack(spacing: 12) {
+                                statusBadge(label: "Checks", rawState: pr.checkSummary?.state)
+                                statusBadge(label: "Actions", rawState: pr.actionsSummary?.state)
+                            }
+                            .font(.caption)
                             if let actions = viewModel.actions(for: pr.stableID) {
                                 ForEach(actions.runs.prefix(1), id: \.id) { run in
-                                    Text("Run: \(run.name) - \(run.conclusion ?? run.status)").font(.caption)
+                                    Text("Run: \(run.name) - \(run.conclusion ?? run.status)")
+                                        .font(.caption)
+                                        .foregroundStyle(stateColor(mappedState(run.status, run.conclusion)))
                                     if let jobs = actions.jobsByRunID[run.id] {
                                         ForEach(jobs.prefix(5), id: \.id) { job in
                                             Text("• \(job.name): \(job.conclusion ?? job.status)")
                                                 .font(.caption2)
-                                                .foregroundStyle(job.conclusion == "failure" ? .red : .secondary)
+                                                .foregroundStyle(stateColor(mappedState(job.status, job.conclusion)))
                                         }
                                     }
                                 }
@@ -110,6 +114,55 @@ struct MonitorWindowView: View {
         frame.size.height += delta
         frame.origin.y -= delta
         window.setFrame(frame, display: true, animate: true)
+    }
+
+    private func statusBadge(label: String, rawState: String?) -> some View {
+        let state = mappedState(rawState)
+        return HStack(spacing: 5) {
+            Circle()
+                .fill(stateColor(state))
+                .frame(width: 8, height: 8)
+            Text("\(label): \(rawState ?? "n/a")")
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func mappedState(_ raw: String?) -> ActionState {
+        switch raw {
+        case "success":
+            return .success
+        case "failure", "cancelled", "timed_out":
+            return .failure
+        case "in_progress", "queued", "waiting", "requested":
+            return .inProgress
+        default:
+            return .neutral
+        }
+    }
+
+    private func mappedState(_ status: String, _ conclusion: String?) -> ActionState {
+        if status != "completed" { return .inProgress }
+        switch conclusion {
+        case "success":
+            return .success
+        case "failure", "cancelled", "timed_out":
+            return .failure
+        default:
+            return .neutral
+        }
+    }
+
+    private func stateColor(_ state: ActionState) -> Color {
+        switch state {
+        case .success:
+            return .green
+        case .failure:
+            return .red
+        case .inProgress:
+            return .yellow
+        case .neutral:
+            return .gray
+        }
     }
 }
 
