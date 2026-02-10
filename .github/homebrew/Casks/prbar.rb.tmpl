@@ -6,6 +6,7 @@ cask "prbar" do
   name "PRBar"
   desc "Menubar app for GitHub pull request monitoring"
   homepage "https://github.com/neural-harmonics/prbar"
+
   depends_on macos: ">= :ventura"
 
   app "PRBar.app"
