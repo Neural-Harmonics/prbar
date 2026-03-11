@@ -48,3 +48,4 @@ tmp/
 
 # Claude
 .claude/
+.memory/

@@ -4,6 +4,8 @@ struct PRDetailsPanelView: View {
     @ObservedObject var viewModel: MainViewModel
     @ObservedObject var detailsViewModel: PRDetailsViewModel
     let pinMonitor: () -> Void
+    @State private var showOnlyFailedJobs = false
+    @State private var expandedJobKeys: Set<String> = []
 
     var body: some View {
         ScrollView {
@@ -64,20 +66,77 @@ struct PRDetailsPanelView: View {
     }
 
     @ViewBuilder private func actions(_ d: PRExpandedDetails) -> some View {
-        Text("Workflow Runs").font(.subheadline)
+        HStack {
+            Text("Workflow Runs").font(.subheadline)
+            Spacer()
+            Toggle("Failed jobs only", isOn: $showOnlyFailedJobs)
+                .toggleStyle(.checkbox)
+                .font(.caption2)
+        }
         ForEach(d.actions.runs.prefix(2), id: \.id) { run in
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Image(systemName: icon(status: run.status, conclusion: run.conclusion))
                     Text(run.name).font(.caption)
                     Spacer()
+                    stateChip(mappedState(run.status, run.conclusion), text: run.conclusion ?? run.status)
                     Link("Open Run", destination: run.htmlURL).font(.caption2)
                 }
                 if let jobs = d.actions.jobsByRunID[run.id] {
-                    ForEach(jobs.prefix(4), id: \.id) { job in
-                        Text("• \(job.name): \(job.conclusion ?? job.status)")
-                            .font(.caption2)
-                            .foregroundStyle(job.conclusion == "failure" ? .red : .secondary)
+                    let visibleJobs = showOnlyFailedJobs
+                        ? jobs.filter { mappedState($0.status, $0.conclusion) == .failure }
+                        : jobs
+                    let totalSteps = jobs.reduce(0) { $0 + $1.totalStepCount }
+                    let doneSteps = jobs.reduce(0) { $0 + $1.completedStepCount }
+                    if totalSteps > 0 {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Step progress: \(doneSteps)/\(totalSteps)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            ProgressView(value: Double(doneSteps), total: Double(totalSteps))
+                                .controlSize(.small)
+                        }
+                    }
+
+                    ForEach(visibleJobs.prefix(4), id: \.id) { job in
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 6) {
+                                stateChip(mappedState(job.status, job.conclusion), text: job.conclusion ?? job.status)
+                                Text(job.name)
+                                    .font(.caption2)
+                                Spacer()
+                                Text(jobStepSummary(job))
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                if !job.sortedSteps.isEmpty {
+                                    Button {
+                                        toggleJobExpanded(run: run, job: job)
+                                    } label: {
+                                        Image(systemName: isJobExpanded(run: run, job: job) ? "chevron.up" : "chevron.down")
+                                            .font(.caption2)
+                                    }
+                                    .buttonStyle(.borderless)
+                                }
+                            }
+                            if let step = job.activeStep {
+                                Text("Current step: #\(step.number) \(step.name)")
+                                    .font(.caption2)
+                                    .foregroundStyle(stateColor(mappedState(step.status, step.conclusion)))
+                            }
+                            if isJobExpanded(run: run, job: job) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    ForEach(job.sortedSteps, id: \.id) { step in
+                                        HStack(spacing: 6) {
+                                            stateChip(mappedState(step.status, step.conclusion), text: step.conclusion ?? step.status)
+                                            Text("#\(step.number) \(step.name)")
+                                                .font(.caption2)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                }
+                                .padding(.leading, 8)
+                            }
+                        }
                     }
                 }
             }
@@ -109,5 +168,59 @@ struct PRDetailsPanelView: View {
         if conclusion == "success" { return ActionState.success.sfSymbol }
         if conclusion == "failure" || conclusion == "cancelled" || conclusion == "timed_out" { return ActionState.failure.sfSymbol }
         return ActionState.neutral.sfSymbol
+    }
+
+    private func mappedState(_ status: String, _ conclusion: String?) -> ActionState {
+        if status != "completed" { return .inProgress }
+        if conclusion == "success" { return .success }
+        if conclusion == "failure" || conclusion == "cancelled" || conclusion == "timed_out" { return .failure }
+        return .neutral
+    }
+
+    private func stateColor(_ state: ActionState) -> Color {
+        switch state {
+        case .success:
+            return .green
+        case .failure:
+            return .red
+        case .inProgress:
+            return .yellow
+        case .neutral:
+            return .gray
+        }
+    }
+
+    private func jobStepSummary(_ job: Job) -> String {
+        guard job.totalStepCount > 0 else {
+            return job.conclusion ?? job.status
+        }
+        return "\(job.completedStepCount)/\(job.totalStepCount) steps"
+    }
+
+    private func jobKey(run: WorkflowRun, job: Job) -> String {
+        "\(run.id):\(job.id)"
+    }
+
+    private func isJobExpanded(run: WorkflowRun, job: Job) -> Bool {
+        expandedJobKeys.contains(jobKey(run: run, job: job))
+    }
+
+    private func toggleJobExpanded(run: WorkflowRun, job: Job) {
+        let key = jobKey(run: run, job: job)
+        if expandedJobKeys.contains(key) {
+            expandedJobKeys.remove(key)
+        } else {
+            expandedJobKeys.insert(key)
+        }
+    }
+
+    private func stateChip(_ state: ActionState, text: String) -> some View {
+        Text(text)
+            .font(.caption2)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(stateColor(state).opacity(0.18))
+            .foregroundStyle(stateColor(state))
+            .clipShape(Capsule())
     }
 }
