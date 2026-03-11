@@ -224,6 +224,13 @@ jobs:
           sed -i '' "s/__VERSION__/${VERSION}/g" "$TMP_CASK"
           sed -i '' "s/__SHA256__/${ZIP_SHA256}/g" "$TMP_CASK"
 
+          # brew tap requires a git repository when using a local file:// URL
+          git -C "$TMP_TAP_DIR" init -q
+          git -C "$TMP_TAP_DIR" config user.email "ci@localhost"
+          git -C "$TMP_TAP_DIR" config user.name "CI"
+          git -C "$TMP_TAP_DIR" add .
+          git -C "$TMP_TAP_DIR" commit -q -m "init"
+
           brew untap neural-harmonics/prbar >/dev/null 2>&1 || true
           brew tap neural-harmonics/prbar "file://$TMP_TAP_DIR"
           brew style --cask prbar
