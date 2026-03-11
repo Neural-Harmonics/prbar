@@ -28,5 +28,5 @@ The main view is the primary workspace in PRBar. Open it by clicking the PRBar i
 ## Tips
 
 - Use search by repository name when your PR list is long.
-- If data looks stale, trigger a manual refresh from the app controls.
+- If data looks stale, use `Refresh All` above the left PR list to reload all pull requests.
 - Keep the right panel focused on one PR while filtering on the left.

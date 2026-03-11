@@ -70,6 +70,21 @@ struct PopoverView: View {
                     .toggleStyle(.checkbox)
                     .font(.caption2)
 
+                    HStack {
+                        Text("Pull Requests")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button {
+                            Task { await viewModel.refreshAll(manual: true) }
+                        } label: {
+                            Label("Refresh All", systemImage: "arrow.clockwise")
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .help("Refresh all pull requests in the left list")
+                    }
+
                     List(viewModel.filteredPRs.filter { viewModel.currentSettings().includeDrafts || !$0.isDraft }, id: \.stableID) { pr in
                         PRRowView(pr: pr, selected: viewModel.selectedPR()?.stableID == pr.stableID)
                             .onTapGesture {

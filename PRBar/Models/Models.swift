@@ -54,6 +54,29 @@ struct Step: Codable, Hashable, Identifiable {
     let number: Int
 }
 
+extension Job {
+    var sortedSteps: [Step] {
+        steps.sorted { $0.number < $1.number }
+    }
+
+    var completedStepCount: Int {
+        sortedSteps.filter { $0.status == "completed" }.count
+    }
+
+    var totalStepCount: Int {
+        sortedSteps.count
+    }
+
+    var progress: Double {
+        guard totalStepCount > 0 else { return 0 }
+        return Double(completedStepCount) / Double(totalStepCount)
+    }
+
+    var activeStep: Step? {
+        sortedSteps.first { $0.status != "completed" }
+    }
+}
+
 struct CheckRun: Codable, Hashable, Identifiable {
     let id: Int
     let name: String
